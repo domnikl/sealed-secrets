@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"encoding/base64"
+	"encoding/json"
 	"io"
 	mathrand "math/rand"
 	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/bitnami-labs/sealed-secrets/pkg/crypto"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -18,7 +18,9 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 
-	// Install standard API types
+	"github.com/bitnami-labs/sealed-secrets/pkg/crypto"
+
+	// Install standard API types.
 	_ "k8s.io/client-go/kubernetes"
 )
 
@@ -297,7 +299,7 @@ func TestSealRoundTripWithMisMatchClusterWide(t *testing.T) {
 
 	_, err := ssecret.Unseal(codecs, keys)
 	if err == nil {
-		t.Fatalf("Unseal did not return expected error: %v", err)
+		t.Fatal("Expecting error: got nil instead")
 	}
 }
 
@@ -358,14 +360,16 @@ func TestSealRoundTripTemplateData(t *testing.T) {
 			Namespace: "myns",
 		},
 		Data: map[string][]byte{
-			"foo": []byte("bar"),
+			"foo":      []byte("bar"),
+			"password": []byte("hunter2'\"="),
 		},
 	}
 
 	ssecret, codecs, keys := sealSecret(t, &secret, NewSealedSecret)
 
 	ssecret.Spec.Template.Data = map[string]string{
-		"bar": `secret {{ index . "foo"}} !`,
+		"bar":           `secret {{ index . "foo" }} !`,
+		"password-json": `{{ toJson .password }}`,
 	}
 
 	secret2, err := ssecret.Unseal(codecs, keys)
@@ -374,6 +378,15 @@ func TestSealRoundTripTemplateData(t *testing.T) {
 	}
 
 	if got, want := string(secret2.Data["bar"]), "secret bar !"; got != want {
+		t.Errorf("got: %q, want: %q", got, want)
+	}
+
+	want, err := json.Marshal(string(secret.Data["password"]))
+	if err != nil {
+		t.Fatalf("json.Marshal returned error: %v", err)
+	}
+
+	if got := string(secret2.Data["password-json"]); got != string(want) {
 		t.Errorf("got: %q, want: %q", got, want)
 	}
 }
@@ -394,6 +407,63 @@ func TestTemplateWithoutEncryptedData(t *testing.T) {
 
 	if got, want := unsealed.Data, map[string][]byte{"foo": []byte("bar")}; !reflect.DeepEqual(got, want) {
 		t.Errorf("got: %q, want: %q", got, want)
+	}
+}
+
+func TestSkipSetOwnerReference(t *testing.T) {
+	testCases := []struct {
+		sealedSecret          SealedSecret
+		skipSetOwnerReference bool
+		secret                v1.Secret
+	}{
+		{
+			sealedSecret: SealedSecret{
+				Spec: SealedSecretSpec{
+					Template: SecretTemplateSpec{
+						Data: map[string]string{"foo": "bar"},
+					},
+				},
+			},
+			skipSetOwnerReference: true,
+			secret: v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{},
+			},
+		},
+		{
+			sealedSecret: SealedSecret{
+				Spec: SealedSecretSpec{
+					Template: SecretTemplateSpec{
+						Data: map[string]string{"foo": "bar"},
+					},
+				},
+			},
+			skipSetOwnerReference: false,
+			secret: v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					OwnerReferences: []metav1.OwnerReference{},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		if tc.skipSetOwnerReference {
+			if tc.sealedSecret.Spec.Template.Annotations == nil {
+				tc.sealedSecret.Spec.Template.Annotations = make(map[string]string)
+			}
+			tc.sealedSecret.Spec.Template.Annotations[SealedSecretSkipSetOwnerReferencesAnnotation] = "true"
+		}
+		unsealed, err := tc.sealedSecret.Unseal(serializer.CodecFactory{}, nil)
+		if err != nil {
+			t.Fatalf("Unseal returned error: %v", err)
+		}
+		if tc.sealedSecret.Spec.Template.Annotations[SealedSecretSkipSetOwnerReferencesAnnotation] == "true" &&
+			len(unsealed.ObjectMeta.OwnerReferences) > 0 {
+			t.Errorf("got: owner, want: no owner")
+		} else if (tc.sealedSecret.Spec.Template.Annotations[SealedSecretSkipSetOwnerReferencesAnnotation] != "true") &&
+			len(unsealed.ObjectMeta.OwnerReferences) == 0 {
+			t.Errorf("got: no owner, want:  owner")
+		}
 	}
 }
 
@@ -512,6 +582,37 @@ func TestRejectBothEncryptedDataAndDeprecatedV1Data(t *testing.T) {
 			t.Fatalf("Expecting error: %v to contain %q", err, needle)
 		}
 	}))
+}
+
+func TestInvalidBase64(t *testing.T) {
+	sealedSecret := &SealedSecret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "myname",
+			Namespace: "myns",
+		},
+		Spec: SealedSecretSpec{
+			EncryptedData: map[string]string{
+				"foo": "NOTVALIDBASE64",
+			},
+		},
+	}
+
+	scheme := runtime.NewScheme()
+	codecs := serializer.NewCodecFactory(scheme)
+	_, keys := generateTestKey(t, testRand(), 2048)
+
+	_, err := sealedSecret.Unseal(codecs, keys)
+	if err == nil {
+		t.Fatal("Expecting error: got nil instead")
+	}
+
+	if !strings.Contains(err.Error(), "foo") {
+		t.Errorf("Expecting error: %q to contain field %q", err, "foo")
+	}
+
+	if strings.Contains(err.Error(), "decrypt") {
+		t.Errorf("Expecting error: %q to not contain %q (invalid base64 should skip decryption)", err, "decrypt")
+	}
 }
 
 func sealSecret(t *testing.T, secret *v1.Secret, newSealedSecret func(serializer.CodecFactory, *rsa.PublicKey, *v1.Secret) (*SealedSecret, error)) (*SealedSecret, serializer.CodecFactory, map[string]*rsa.PrivateKey) {

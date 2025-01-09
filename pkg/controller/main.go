@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"sort"
@@ -29,27 +29,33 @@ import (
 )
 
 var (
-	// Selector used to find existing public/private key pairs on startup
+	// Selector used to find existing public/private key pairs on startup.
 	keySelector = fields.OneTermEqualSelector(SealedSecretsKeyLabel, "active")
 )
 
-// Flags to configure the controller
+// Flags to configure the controller.
 type Flags struct {
-	KeyPrefix            string
-	KeySize              int
-	ValidFor             time.Duration
-	MyCN                 string
-	KeyRenewPeriod       time.Duration
-	AcceptV1Data         bool
-	KeyCutoffTime        string
-	NamespaceAll         bool
-	AdditionalNamespaces string
-	LabelSelector        string
-	RateLimitPerSecond   int
-	RateLimitBurst       int
-	OldGCBehavior        bool
-	UpdateStatus         bool
-	SkipRecreate         bool
+	KeyPrefix             string
+	KeySize               int
+	ValidFor              time.Duration
+	MyCN                  string
+	KeyRenewPeriod        time.Duration
+	AcceptV1Data          bool
+	KeyCutoffTime         string
+	NamespaceAll          bool
+	AdditionalNamespaces  string
+	LabelSelector         string
+	RateLimitPerSecond    int
+	RateLimitBurst        int
+	OldGCBehavior         bool
+	UpdateStatus          bool
+	SkipRecreate          bool
+	LogInfoToStdout       bool
+	LogLevel              string
+	LogFormat             string
+	PrivateKeyAnnotations string
+	PrivateKeyLabels      string
+	MaxRetries            int
 }
 
 func initKeyPrefix(keyPrefix string) (string, error) {
@@ -57,7 +63,7 @@ func initKeyPrefix(keyPrefix string) (string, error) {
 }
 
 func initKeyRegistry(ctx context.Context, client kubernetes.Interface, r io.Reader, namespace, prefix, label string, keysize int) (*KeyRegistry, error) {
-	log.Printf("Searching for existing private keys")
+	slog.Info("Searching for existing private keys")
 	secretList, err := client.CoreV1().Secrets(namespace).List(ctx, metav1.ListOptions{
 		LabelSelector: keySelector.String(),
 	})
@@ -80,13 +86,12 @@ func initKeyRegistry(ctx context.Context, client kubernetes.Interface, r io.Read
 	for _, secret := range items {
 		key, certs, err := readKey(secret)
 		if err != nil {
-			log.Printf("Error reading key %s: %v", secret.Name, err)
+			slog.Error("Error reading key", "secret", secret.Name, "error", err)
 		}
-		ct := secret.CreationTimestamp
-		if err := keyRegistry.registerNewKey(secret.Name, key, certs[0], ct.Time); err != nil {
+		if err := keyRegistry.registerNewKey(secret.Name, key, certs[0], certs[0].NotBefore); err != nil {
 			return nil, err
 		}
-		log.Printf("----- %s", secret.Name)
+		slog.Info("registered private key", "secretname", secret.Name)
 	}
 	return keyRegistry, nil
 }
@@ -109,19 +114,19 @@ func myNamespace() string {
 // Initialises the first key and starts the rotation job. returns an early trigger function.
 // A period of 0 deactivates automatic rotation, but manual rotation (e.g. triggered by SIGUSR1)
 // is still honoured.
-func initKeyRenewal(ctx context.Context, registry *KeyRegistry, period, validFor time.Duration, cutoffTime time.Time, cn string) (func(), error) {
+func initKeyRenewal(ctx context.Context, registry *KeyRegistry, period, validFor time.Duration, cutoffTime time.Time, cn string, privateKeyAnnotations string, privateKeyLabels string) (func(), error) {
 	// Create a new key if it's the first key,
 	// or if it's older than cutoff time.
-	if len(registry.keys) == 0 || registry.mostRecentKey.creationTime.Before(cutoffTime) {
-		if _, err := registry.generateKey(ctx, validFor, cn); err != nil {
+	if len(registry.keys) == 0 || registry.mostRecentKey.orderingTime.Before(cutoffTime) {
+		if _, err := registry.generateKey(ctx, validFor, cn, privateKeyAnnotations, privateKeyLabels); err != nil {
 			return nil, err
 		}
 	}
 
 	// wrapper function to log error thrown by generateKey function
 	keyGenFunc := func() {
-		if _, err := registry.generateKey(ctx, validFor, cn); err != nil {
-			log.Printf("Failed to generate new key : %v\n", err)
+		if _, err := registry.generateKey(ctx, validFor, cn, privateKeyAnnotations, privateKeyLabels); err != nil {
+			slog.Error("Failed to generate new key", "error", err)
 		}
 	}
 	if period == 0 {
@@ -130,7 +135,7 @@ func initKeyRenewal(ctx context.Context, registry *KeyRegistry, period, validFor
 
 	// If key rotation is enabled, we'll rotate the key when the most recent
 	// key becomes stale (older than period).
-	mostRecentKeyAge := time.Since(registry.mostRecentKey.creationTime)
+	mostRecentKeyAge := time.Since(registry.mostRecentKey.orderingTime)
 	initialDelay := period - mostRecentKeyAge
 	if initialDelay < 0 {
 		initialDelay = 0
@@ -140,6 +145,7 @@ func initKeyRenewal(ctx context.Context, registry *KeyRegistry, period, validFor
 
 func Main(f *Flags, version string) error {
 	registerMetrics(version)
+
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return err
@@ -177,7 +183,7 @@ func Main(f *Flags, version string) error {
 		}
 	}
 
-	trigger, err := initKeyRenewal(ctx, keyRegistry, f.KeyRenewPeriod, f.ValidFor, ct, f.MyCN)
+	trigger, err := initKeyRenewal(ctx, keyRegistry, f.KeyRenewPeriod, f.ValidFor, ct, f.MyCN, f.PrivateKeyAnnotations, f.PrivateKeyLabels)
 	if err != nil {
 		return err
 	}
@@ -187,7 +193,7 @@ func Main(f *Flags, version string) error {
 	namespace := v1.NamespaceAll
 	if !f.NamespaceAll || f.AdditionalNamespaces != "" {
 		namespace = myNamespace()
-		log.Printf("Starting informer for namespace: %s\n", namespace)
+		slog.Info("Starting informer", "namespace", namespace)
 	}
 
 	var tweakopts func(*metav1.ListOptions) = nil
@@ -215,7 +221,7 @@ func Main(f *Flags, version string) error {
 		for _, ns := range addNS {
 			if _, err := clientset.CoreV1().Namespaces().Get(ctx, ns, metav1.GetOptions{}); err != nil {
 				if errors.IsNotFound(err) {
-					log.Printf("Warning: namespace '%s' doesn't exist\n", ns)
+					slog.Error("namespace doesn't exist", "namespace", ns)
 					continue
 				}
 				return err
@@ -227,7 +233,7 @@ func Main(f *Flags, version string) error {
 				}
 				ctlr.oldGCBehavior = f.OldGCBehavior
 				ctlr.updateStatus = f.UpdateStatus
-				log.Printf("Starting informer for namespace: %s\n", ns)
+				slog.Info("Starting informer", "namespace", ns)
 				go ctlr.Run(stop)
 			}
 		}
@@ -242,18 +248,27 @@ func Main(f *Flags, version string) error {
 	}
 
 	server := httpserver(cp, controller.AttemptUnseal, controller.Rotate, f.RateLimitBurst, f.RateLimitPerSecond)
+	serverMetrics := httpserverMetrics()
 
 	sigterm := make(chan os.Signal, 1)
 	signal.Notify(sigterm, syscall.SIGTERM)
 	<-sigterm
 
-	return server.Shutdown(context.Background())
+	if err := server.Shutdown(context.Background()); err != nil {
+		return err
+	}
+
+	if err := serverMetrics.Shutdown(context.Background()); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func prepareController(clientset kubernetes.Interface, namespace string, tweakopts func(*metav1.ListOptions), f *Flags, ssclientset versioned.Interface, keyRegistry *KeyRegistry) (*Controller, error) {
 	sinformer := initSecretInformerFactory(clientset, namespace, tweakopts, f.SkipRecreate)
 	ssinformer := ssinformers.NewFilteredSharedInformerFactory(ssclientset, 0, namespace, tweakopts)
-	controller, err := NewController(clientset, ssclientset, ssinformer, sinformer, keyRegistry)
+	controller, err := NewController(clientset, ssclientset, ssinformer, sinformer, keyRegistry, f.MaxRetries)
 	return controller, err
 }
 

@@ -1,7 +1,7 @@
 GO = go
 GOTESTSUM = gotestsum
 GOFMT = gofmt
-GOLANGCILINT=golangci-lint
+GOLANGCILINT=golangci-lint -vv
 GOSEC=gosec
 
 export GO111MODULE = on
@@ -10,7 +10,7 @@ GO_FLAGS =
 KUBECFG = kubecfg
 DOCKER = docker
 GINKGO = ginkgo -p
-CONTROLLER_GEN ?= controller-gen
+CONTROLLER_GEN ?= go run sigs.k8s.io/controller-tools/cmd/controller-gen@latest
 
 REGISTRY ?= docker.io
 CONTROLLER_IMAGE = $(REGISTRY)/bitnami/sealed-secrets-controller:latest
@@ -45,17 +45,13 @@ GO_LD_FLAGS = -X main.VERSION=$(VERSION)
 
 all: controller kubeseal
 
-generate: $(GO_FILES)
-	$(GO) mod vendor && $(GO) generate $(GO_PACKAGES)
-	@# TODO: remove as soon as a proper way forward is found:
-	@# code-generator insists in generating the file under directory:
-	@# github.com/bitnami-labs/sealeds-secrets/...
-	@# instead of just updating ./pkg
-	@# for that reason we generate at gentmp and then move it all to ./pkg
-	cp -r gentmp/github.com/bitnami-labs/sealed-secrets/pkg . && rm -rf gentmp/
+generate:
+	$(GO) mod vendor
+	./hack/update-codegen.sh
+	rm -rf vendor
 
 manifests:
-	$(CONTROLLER_GEN) crd paths="./pkg/apis/..." output:stdout | tail -n +2 > helm/sealed-secrets/crds/bitnami.com_sealedsecrets.yaml
+	$(CONTROLLER_GEN) crd:generateEmbeddedObjectMeta=true paths="./pkg/apis/..." output:stdout | tail -n +2 > helm/sealed-secrets/crds/bitnami.com_sealedsecrets.yaml
 	yq '.spec.versions[0].schema' < helm/sealed-secrets/crds/bitnami.com_sealedsecrets.yaml > schema-v1alpha1.yaml
 
 controller: $(GO_FILES)
@@ -116,7 +112,7 @@ controller-norbac.yaml: controller-norbac.jsonnet schema-v1alpha1.yaml kube-fixe
 controller-podmonitor.yaml: controller.jsonnet controller-norbac.jsonnet schema-v1alpha1.yaml kube-fixes.libsonnet
 
 test:
-	$(GOTESTSUM) $(GO_FLAGS) $(GO_PACKAGES)
+	$(GOTESTSUM) $(GO_FLAGS) --junitfile report.xml --format testname -- "-coverprofile=coverage.out" $(GO_PACKAGES)
 
 integrationtest: kubeseal controller
 	# Assumes a k8s cluster exists, with controller already installed
@@ -134,7 +130,7 @@ lint:
 	 $(GOLANGCILINT) run --enable goimports --timeout=5m
 
 lint-gosec:
-	 $(GOSEC) -r --severity medium
+	 $(GOSEC) -r -severity low -exclude-generated
 
 clean:
 	$(RM) ./controller ./kubeseal
