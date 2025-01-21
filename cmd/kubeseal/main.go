@@ -23,7 +23,7 @@ import (
 	"github.com/bitnami-labs/sealed-secrets/pkg/kubeseal"
 	"github.com/bitnami-labs/sealed-secrets/pkg/pflagenv"
 
-	// Register Auth providers
+	// Register Auth providers.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
@@ -32,7 +32,7 @@ const (
 )
 
 var (
-	// VERSION set from Makefile
+	// VERSION set from Makefile.
 	VERSION = buildinfo.DefaultVersion
 )
 
@@ -55,6 +55,7 @@ type cliFlags struct {
 	reEncrypt      bool
 	unseal         bool
 	privKeys       []string
+	help           bool
 }
 
 type config struct {
@@ -102,6 +103,9 @@ func bindFlags(f *cliFlags, fs *flag.FlagSet) {
 
 	fs.BoolVar(&f.unseal, "recovery-unseal", false, "Decrypt a sealed secrets file obtained from stdin, using the private key passed with --recovery-private-key. Intended to be used in disaster recovery mode.")
 	fs.StringSliceVar(&f.privKeys, "recovery-private-key", nil, "Private key filename used by the --recovery-unseal command. Multiple files accepted either via comma separated list or by repetition of the flag. Either PEM encoded private keys or a backup of a json/yaml encoded k8s sealed-secret controller secret (and v1.List) are accepted. ")
+	fs.BoolVar(&f.help, "help", false, "Print this help message")
+
+	fs.SetOutput(os.Stdout)
 }
 
 func bindClientFlags(fs *flag.FlagSet, gofs *goflag.FlagSet, overrides *clientcmd.ConfigOverrides) {
@@ -124,6 +128,13 @@ func initUsualKubectlFlags(overrides *clientcmd.ConfigOverrides, fs *flag.FlagSe
 
 func runCLI(w io.Writer, cfg *config) (err error) {
 	flags := cfg.flags
+
+	if flags.help {
+		fmt.Fprintf(os.Stdout, "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		return nil
+	}
+
 	if len(flags.fromFile) != 0 && !flags.raw {
 		return fmt.Errorf("--from-file requires --raw")
 	}
@@ -133,7 +144,7 @@ func runCLI(w io.Writer, cfg *config) (err error) {
 		// #nosec G304 -- should open user provided file
 		f, err := os.Open(flags.inputFileName)
 		if err != nil {
-			return nil
+			return fmt.Errorf("Could not read file specified with --secret-file")
 		}
 		// #nosec: G307 -- this deferred close is fine because it is not on a writable file
 		defer f.Close()
@@ -189,6 +200,7 @@ func runCLI(w io.Writer, cfg *config) (err error) {
 	if err != nil {
 		return err
 	}
+	// #nosec: G307 -- this deferred close is fine because it is not on a writable file
 	defer f.Close()
 
 	if flags.dumpCert {

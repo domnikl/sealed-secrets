@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"text/template"
 
@@ -13,8 +14,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	runtimeserializer "k8s.io/apimachinery/pkg/runtime/serializer"
 
-	"github.com/bitnami-labs/sealed-secrets/pkg/crypto"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/mkmik/multierror"
+
+	"github.com/bitnami-labs/sealed-secrets/pkg/crypto"
 )
 
 const (
@@ -30,7 +33,7 @@ const (
 )
 
 var (
-	// TODO(mkm): remove after a release
+	// TODO(mkm): remove after a release.
 	AcceptDeprecatedV1Data = false
 )
 
@@ -40,7 +43,7 @@ type SealedSecretExpansion interface {
 }
 
 // SealingScope is an enum that declares the mobility of a sealed secret by defining
-// in which scopes
+// in which scopes.
 type SealingScope int
 
 func (s *SealingScope) String() string {
@@ -72,7 +75,7 @@ func (s *SealingScope) Set(v string) error {
 	return nil
 }
 
-// Type implements the pflag.Value interface
+// Type implements the pflag.Value interface.
 func (s *SealingScope) Type() string { return "string" }
 
 // EncryptionLabel returns the label meant to be used for encrypting a sealed secret according to scope.
@@ -207,7 +210,8 @@ func NewSealedSecret(codecs runtimeserializer.CodecFactory, pubKey *rsa.PublicKe
 		Spec: SealedSecretSpec{
 			Template: SecretTemplateSpec{
 				// ObjectMeta copied below
-				Type: secret.Type,
+				Type:      secret.Type,
+				Immutable: secret.Immutable,
 			},
 			EncryptedData: map[string]string{},
 		},
@@ -265,6 +269,7 @@ func (s *SealedSecret) Unseal(codecs runtimeserializer.CodecFactory, privKeys ma
 	if s.Spec.Data == nil {
 		s.Spec.Template.ObjectMeta.DeepCopyInto(&secret.ObjectMeta)
 		secret.Type = s.Spec.Template.Type
+		secret.Immutable = s.Spec.Template.Immutable
 
 		secret.Data = map[string][]byte{}
 		data := map[string]string{}
@@ -273,7 +278,8 @@ func (s *SealedSecret) Unseal(codecs runtimeserializer.CodecFactory, privKeys ma
 		for key, value := range s.Spec.EncryptedData {
 			valueBytes, err := base64.StdEncoding.DecodeString(value)
 			if err != nil {
-				return nil, err
+				errs = append(errs, multierror.Tag(key, err))
+				continue
 			}
 			plaintext, err := crypto.HybridDecrypt(rand.Reader, privKeys, valueBytes, label)
 			if err != nil {
@@ -285,7 +291,7 @@ func (s *SealedSecret) Unseal(codecs runtimeserializer.CodecFactory, privKeys ma
 
 		for key, value := range s.Spec.Template.Data {
 			var plaintext bytes.Buffer
-			template, err := template.New(key).Parse(value)
+			template, err := template.New(key).Funcs(sprig.FuncMap()).Parse(value)
 			if err != nil {
 				errs = append(errs, multierror.Tag(key, err))
 				continue
@@ -298,7 +304,7 @@ func (s *SealedSecret) Unseal(codecs runtimeserializer.CodecFactory, privKeys ma
 		}
 
 		if errs != nil {
-			return nil, multierror.Join(multierror.Uniq(errs), multierror.WithFormatter(multierror.InlineFormatter))
+			return nil, multierror.Format(errors.Join(multierror.Uniq(errs)...), multierror.InlineFormatter)
 		}
 	} else if AcceptDeprecatedV1Data { // Support decrypting old secrets for backward compatibility
 		if len(s.Spec.EncryptedData) > 0 {
@@ -323,18 +329,19 @@ func (s *SealedSecret) Unseal(codecs runtimeserializer.CodecFactory, privKeys ma
 	secret.SetName(smeta.GetName())
 
 	gvk := s.GetObjectKind().GroupVersionKind()
-
-	// Refer back to owning SealedSecret
-	ownerRefs := []metav1.OwnerReference{
-		{
-			APIVersion: gvk.GroupVersion().String(),
-			Kind:       gvk.Kind,
-			Name:       smeta.GetName(),
-			UID:        smeta.GetUID(),
-			Controller: &boolTrue,
-		},
+	if anno, ok := s.Spec.Template.Annotations[SealedSecretSkipSetOwnerReferencesAnnotation]; !ok || anno != "true" {
+		// Refer back to owning SealedSecret
+		ownerRefs := []metav1.OwnerReference{
+			{
+				APIVersion: gvk.GroupVersion().String(),
+				Kind:       gvk.Kind,
+				Name:       smeta.GetName(),
+				UID:        smeta.GetUID(),
+				Controller: &boolTrue,
+			},
+		}
+		secret.SetOwnerReferences(ownerRefs)
 	}
-	secret.SetOwnerReferences(ownerRefs)
 
 	return &secret, nil
 }

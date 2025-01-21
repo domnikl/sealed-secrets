@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"log"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -20,7 +20,7 @@ type Key struct {
 	private      *rsa.PrivateKey
 	cert         *x509.Certificate
 	fingerprint  string
-	creationTime time.Time
+	orderingTime time.Time
 }
 
 // A KeyRegistry manages the key pairs used to (un)seal secrets.
@@ -47,13 +47,13 @@ func NewKeyRegistry(client kubernetes.Interface, namespace, keyPrefix, keyLabel 
 	}
 }
 
-func (kr *KeyRegistry) generateKey(ctx context.Context, validFor time.Duration, cn string) (string, error) {
+func (kr *KeyRegistry) generateKey(ctx context.Context, validFor time.Duration, cn string, privateKeyAnnotations string, privateKeyLabels string) (string, error) {
 	key, cert, err := generatePrivateKeyAndCert(kr.keysize, validFor, cn)
 	if err != nil {
 		return "", err
 	}
 	certs := []*x509.Certificate{cert}
-	generatedName, err := writeKey(ctx, kr.client, key, certs, kr.namespace, kr.keyLabel, kr.keyPrefix)
+	generatedName, err := writeKey(ctx, kr.client, key, certs, kr.namespace, kr.keyLabel, kr.keyPrefix, privateKeyAnnotations, privateKeyLabels)
 	if err != nil {
 		return "", err
 	}
@@ -61,12 +61,12 @@ func (kr *KeyRegistry) generateKey(ctx context.Context, validFor time.Duration, 
 	if err := kr.registerNewKey(generatedName, key, cert, time.Now()); err != nil {
 		return "", err
 	}
-	log.Printf("New key written to %s/%s\n", kr.namespace, generatedName)
-	log.Printf("Certificate is \n%s\n", pem.EncodeToMemory(&pem.Block{Type: certUtil.CertificateBlockType, Bytes: cert.Raw}))
+	slog.Info("New key written", "namespace", kr.namespace, "name", generatedName)
+	slog.Info("Certificate generated", "certificate", pem.EncodeToMemory(&pem.Block{Type: certUtil.CertificateBlockType, Bytes: cert.Raw}))
 	return generatedName, nil
 }
 
-func (kr *KeyRegistry) registerNewKey(keyName string, privKey *rsa.PrivateKey, cert *x509.Certificate, creationTime time.Time) error {
+func (kr *KeyRegistry) registerNewKey(keyName string, privKey *rsa.PrivateKey, cert *x509.Certificate, orderingTime time.Time) error {
 	fingerprint, err := crypto.PublicKeyFingerprint(&privKey.PublicKey)
 	if err != nil {
 		return err
@@ -76,11 +76,11 @@ func (kr *KeyRegistry) registerNewKey(keyName string, privKey *rsa.PrivateKey, c
 		private:      privKey,
 		cert:         cert,
 		fingerprint:  fingerprint,
-		creationTime: creationTime,
+		orderingTime: orderingTime,
 	}
 	kr.keys[k.fingerprint] = k
 
-	if kr.mostRecentKey == nil || kr.mostRecentKey.creationTime.Before(creationTime) {
+	if kr.mostRecentKey == nil || kr.mostRecentKey.orderingTime.Before(orderingTime) {
 		kr.mostRecentKey = k
 	}
 

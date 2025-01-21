@@ -10,13 +10,14 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// Define Prometheus Exporter namespace (prefix) for all metric names
+// Define Prometheus Exporter namespace (prefix) for all metric names.
 const metricNamespace string = "sealed_secrets_controller"
 
 const (
 	labelNamespace = "namespace"
 	labelName      = "name"
 	labelCondition = "condition"
+	labelInstance  = "ss_app_kubernetes_io_instance"
 )
 
 var conditionStatusToGaugeValue = map[v1.ConditionStatus]float64{
@@ -25,7 +26,7 @@ var conditionStatusToGaugeValue = map[v1.ConditionStatus]float64{
 	v1.ConditionTrue:    1,
 }
 
-// Define Prometheus metrics to expose
+// Define Prometheus metrics to expose.
 var (
 	buildInfo prometheus.Gauge
 	// TODO: rename metric, change increment logic, or accept behaviour
@@ -47,11 +48,14 @@ var (
 		[]string{"reason", "namespace"},
 	)
 
-	conditionInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: metricNamespace,
-		Name:      "condition_info",
-		Help:      "Current SealedSecret condition status. Values are -1 (false), 0 (unknown or absent), 1 (true)",
-	}, []string{labelNamespace, labelName, labelCondition})
+	conditionInfo = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: metricNamespace,
+			Name:      "condition_info",
+			Help:      "Current SealedSecret condition status. Values are -1 (false), 0 (unknown or absent), 1 (true)",
+		},
+		[]string{labelNamespace, labelName, labelCondition, labelInstance},
+	)
 
 	httpRequestsTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -102,6 +106,7 @@ func ObserveCondition(ssecret *v1alpha1.SealedSecret) {
 			labelNamespace: ssecret.Namespace,
 			labelName:      ssecret.Name,
 			labelCondition: string(condition.Type),
+			labelInstance:  ssecret.Labels["app.kubernetes.io/instance"],
 		}).Set(conditionStatusToGaugeValue[condition.Status])
 	}
 }
@@ -112,11 +117,11 @@ func UnregisterCondition(ssecret *v1alpha1.SealedSecret) {
 		return
 	}
 	for _, condition := range ssecret.Status.Conditions {
-		conditionInfo.MetricVec.DeleteLabelValues(ssecret.Namespace, ssecret.Name, string(condition.Type))
+		conditionInfo.MetricVec.DeleteLabelValues(ssecret.Namespace, ssecret.Name, string(condition.Type), labelInstance)
 	}
 }
 
-// Instrument HTTP handler
+// Instrument HTTP handler.
 func Instrument(path string, h http.Handler) http.Handler {
 	return promhttp.InstrumentHandlerDuration(httpRequestDurationSeconds.MustCurryWith(prometheus.Labels{"path": path}),
 		promhttp.InstrumentHandlerCounter(httpRequestsTotal.MustCurryWith(prometheus.Labels{"path": path}), h))
