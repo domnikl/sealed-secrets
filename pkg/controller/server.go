@@ -5,6 +5,7 @@ import (
 	"encoding/pem"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -17,9 +18,10 @@ import (
 )
 
 var (
-	listenAddr   = flag.String("listen-addr", ":8080", "HTTP serving address.")
-	readTimeout  = flag.Duration("read-timeout", 2*time.Minute, "HTTP request timeout.")
-	writeTimeout = flag.Duration("write-timeout", 2*time.Minute, "HTTP response timeout.")
+	listenAddr        = flag.String("listen-addr", ":8080", "HTTP serving address.")
+	listenMetricsAddr = flag.String("listen-metrics-addr", ":8081", "HTTP metrics serving address.")
+	readTimeout       = flag.Duration("read-timeout", 2*time.Minute, "HTTP request timeout.")
+	writeTimeout      = flag.Duration("write-timeout", 2*time.Minute, "HTTP response timeout.")
 )
 
 // Called on every request to /cert.  Errors will be logged and return a 500.
@@ -44,19 +46,17 @@ func httpserver(cp certProvider, sc secretChecker, sr secretRotator, burst int, 
 		}
 	})
 
-	mux.Handle("/metrics", promhttp.Handler())
-
 	mux.Handle("/v1/verify", Instrument("/v1/verify", httpRateLimiter.RateLimit(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		content, err := io.ReadAll(r.Body)
 		if err != nil {
-			log.Printf("Error handling /v1/verify request: %v", err)
+			slog.Error("Error handling /v1/verify request", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		valid, err := sc(content)
 		if err != nil {
-			log.Printf("Error validating secret: %v", err)
+			slog.Error("Error validating secret", "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -72,14 +72,14 @@ func httpserver(cp certProvider, sc secretChecker, sr secretRotator, burst int, 
 	mux.Handle("/v1/rotate", Instrument("/v1/rotate", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		content, err := io.ReadAll(r.Body)
 		if err != nil {
-			log.Printf("Error handling /v1/rotate request: %v", err)
+			slog.Error("Error handling /v1/rotate request", "error", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		newSecret, err := sr(content)
 		if err != nil {
-			log.Printf("Error rotating secret: %v", err)
+			slog.Error("Error rotating secret", "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -92,7 +92,7 @@ func httpserver(cp certProvider, sc secretChecker, sr secretRotator, burst int, 
 	mux.Handle("/v1/cert.pem", Instrument("/v1/cert.pem", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		certs, err := cp()
 		if err != nil {
-			log.Printf("cannot get certificates: %v", err)
+			slog.Error("cannot get certificates", "error", err)
 			http.Error(w, "cannot get certificate", http.StatusInternalServerError)
 			return
 		}
@@ -111,10 +111,30 @@ func httpserver(cp certProvider, sc secretChecker, sr secretRotator, burst int, 
 		WriteTimeout:      *writeTimeout,
 	}
 
-	log.Printf("HTTP server serving on %s", server.Addr)
+	slog.Info("HTTP server serving", "addr", server.Addr)
 	go func() {
 		err := server.ListenAndServe()
-		log.Printf("HTTP server exiting: %v", err)
+		slog.Error("HTTP server exiting", "error", err)
+	}()
+	return &server
+}
+
+func httpserverMetrics() *http.Server {
+	mux := http.NewServeMux()
+	mux.Handle("/metrics", promhttp.Handler())
+
+	server := http.Server{
+		Addr:              *listenMetricsAddr,
+		Handler:           mux,
+		ReadTimeout:       *readTimeout,
+		ReadHeaderTimeout: *readTimeout,
+		WriteTimeout:      *writeTimeout,
+	}
+
+	slog.Info("HTTP metrics server serving", "addr", server.Addr)
+	go func() {
+		err := server.ListenAndServe()
+		slog.Error("HTTP metrics server exiting", "error", err)
 	}()
 	return &server
 }

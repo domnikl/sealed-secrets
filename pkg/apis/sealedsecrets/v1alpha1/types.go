@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	// SealedSecretName is the name used in SealedSecret CRD
+	// SealedSecretName is the name used in SealedSecret CRD.
 	SealedSecretName = "sealed-secret." + GroupName
-	// SealedSecretPlural is the collection plural used with SealedSecret API
+	// SealedSecretPlural is the collection plural used with SealedSecret API.
 	SealedSecretPlural = "sealedsecrets"
 
-	// Annotation namespace prefix
+	// Annotation namespace prefix.
 	annoNs = "sealedsecrets." + GroupName + "/"
 
 	// SealedSecretClusterWideAnnotation is the name for the annotation for
@@ -25,31 +25,46 @@ const (
 	SealedSecretNamespaceWideAnnotation = annoNs + "namespace-wide"
 
 	// SealedSecretManagedAnnotation is the name for the annotation for
-	// flaging the existing secrets be managed by SealedSecret controller.
+	// flagging existing secrets to be managed by the Sealed Secrets controller.
 	SealedSecretManagedAnnotation = annoNs + "managed"
+
+	// SealedSecretPatchAnnotation is the name for the annotation for
+	// flagging existing secrets to be patched instead of overwritten by the Sealed Secrets controller.
+	SealedSecretPatchAnnotation = annoNs + "patch"
+
+	// SealedSecretSkipSetOwnerReferencesAnnotation is the name for the annotation for
+	// flagging the controller not to set owner reference to secret.
+	SealedSecretSkipSetOwnerReferencesAnnotation = annoNs + "skip-set-owner-references"
 )
 
 // SecretTemplateSpec describes the structure a Secret should have
-// when created from a template
+// when created from a template.
 type SecretTemplateSpec struct {
 	// Standard object's metadata.
 	// More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
 	// +optional
 	// +nullable
-	// +kubebuilder:validation:XPreserveUnknownFields
+	// +kubebuilder:pruning:PreserveUnknownFields
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
 	// Used to facilitate programmatic handling of secret data.
 	// +optional
 	Type apiv1.SecretType `json:"type,omitempty" protobuf:"bytes,3,opt,name=type,casttype=SecretType"`
 
-	// Keys that should be templated using decrypted data
+	// Immutable, if set to true, ensures that data stored in the Secret cannot
+	// be updated (only object metadata can be modified).
+	// If not set to true, the field can be modified at any time.
+	// Defaulted to nil.
+	// +optional
+	Immutable *bool `json:"immutable,omitempty" protobuf:"varint,5,opt,name=immutable"`
+
+	// Keys that should be templated using decrypted data.
 	// +optional
 	// +nullable
 	Data map[string]string `json:"data,omitempty"`
 }
 
-// SealedSecretSpec is the specification of a SealedSecret
+// SealedSecretSpec is the specification of a SealedSecret.
 type SealedSecretSpec struct {
 	// Template defines the structure of the Secret that will be
 	// created from this sealed secret.
@@ -61,19 +76,19 @@ type SealedSecretSpec struct {
 	EncryptedData SealedSecretEncryptedData `json:"encryptedData"`
 }
 
-// +kubebuilder:validation:XPreserveUnknownFields
+// +kubebuilder:pruning:PreserveUnknownFields
 type SealedSecretEncryptedData map[string]string
 
 func (s *SealedSecretEncryptedData) UnmarshalJSON(data []byte) error {
 	tmp := map[string]string{}
-	// drop error - likelihood of an error occurring is quite high due to the disabled schema validation, these errors
-	// would cause the controller to stop processing any SealedSecret
+	// drop error - likelihood of an error occurring is quite high due to the disabled schema validation, these errors.
+	// would cause the controller to stop processing any SealedSecret.
 	_ = json.Unmarshal(data, &tmp)
 	*s = tmp
 	return nil
 }
 
-// SealedSecretConditionType describes the type of SealedSecret condition
+// SealedSecretConditionType describes the type of SealedSecret condition.
 type SealedSecretConditionType string
 
 const (
@@ -114,6 +129,9 @@ type SealedSecretStatus struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].message"
+// +kubebuilder:printcolumn:name="Synced",type="string",JSONPath=".status.conditions[0].status"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +genclient
 
 // SealedSecret is the K8s representation of a "sealed Secret" - a
@@ -130,7 +148,7 @@ type SealedSecret struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// SealedSecretList represents a list of SealedSecrets
+// SealedSecretList represents a list of SealedSecrets.
 type SealedSecretList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
@@ -138,7 +156,7 @@ type SealedSecretList struct {
 	Items []SealedSecret `json:"items"`
 }
 
-// ByCreationTimestamp is used to sort a list of secrets
+// ByCreationTimestamp is used to sort a list of secrets.
 type ByCreationTimestamp []apiv1.Secret
 
 func (s ByCreationTimestamp) Len() int {

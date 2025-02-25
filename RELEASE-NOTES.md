@@ -4,6 +4,315 @@ Latest release:
 
 [![](https://img.shields.io/github/release/bitnami-labs/sealed-secrets.svg)](https://github.com/bitnami-labs/sealed-secrets/releases/latest)
 
+## v0.28.0
+
+- fix: explicitly set resourceFieldRef.divisor ([#1655](https://github.com/bitnami-labs/sealed-secrets/pull/1655))
+- Fix deprecated functions for bumping client-go ([#1667](https://github.com/bitnami-labs/sealed-secrets/pull/1667))
+- Bump github.com/onsi/ginkgo/v2 from 2.22.1 to 2.22.2 ([#1670](https://github.com/bitnami-labs/sealed-secrets/pull/1670))
+- Bump golang.org/x/crypto from 0.31.0 to 0.32.0 ([#1671](https://github.com/bitnami-labs/sealed-secrets/pull/1671))
+- Bump github.com/onsi/gomega from 1.36.1 to 1.36.2 ([#1669](https://github.com/bitnami-labs/sealed-secrets/pull/1669))
+- Bump github.com/onsi/ginkgo/v2 from 2.22.0 to 2.22.1 ([#1668](https://github.com/bitnami-labs/sealed-secrets/pull/1668))
+- Bump github.com/onsi/gomega from 1.36.0 to 1.36.1 ([#1664](https://github.com/bitnami-labs/sealed-secrets/pull/1664))
+- Bump golang.org/x/crypto from 0.30.0 to 0.31.0 ([#1659](https://github.com/bitnami-labs/sealed-secrets/pull/1659))
+- Bump golang.org/x/crypto from 0.29.0 to 0.30.0 ([#1657](https://github.com/bitnami-labs/sealed-secrets/pull/1657))
+
+## v0.27.3
+
+- Bump k8s.io/apimachinery from 0.31.2 to 0.31.3 ([#1642](https://github.com/bitnami-labs/sealed-secrets/pull/1642))
+- Bump k8s.io/code-generator from 0.31.2 to 0.31.3 ([#1643](https://github.com/bitnami-labs/sealed-secrets/pull/1643))
+- Bump github.com/onsi/gomega from 1.35.1 to 1.36.0 ([#1645](https://github.com/bitnami-labs/sealed-secrets/pull/1645))
+- re-introduce install instructions with to releases ([#1649](https://github.com/bitnami-labs/sealed-secrets/pull/1649))
+- Properly error out when input file doesn't exist ([#1640](https://github.com/bitnami-labs/sealed-secrets/pull/1640))
+- Bump github.com/onsi/ginkgo/v2 from 2.21.0 to 2.22.0 ([#1641](https://github.com/bitnami-labs/sealed-secrets/pull/1641))
+- Bump golang.org/x/crypto from 0.28.0 to 0.29.0 ([#1635](https://github.com/bitnami-labs/sealed-secrets/pull/1635))
+- Configure max retries ([#1633](https://github.com/bitnami-labs/sealed-secrets/pull/1633))
+- Label "app.kubernetes.io/instance" in the Prometheus metric ([#1620](https://github.com/bitnami-labs/sealed-secrets/pull/1620))
+- Bump github.com/onsi/gomega from 1.34.2 to 1.35.1 ([#1624](https://github.com/bitnami-labs/sealed-secrets/pull/1624))
+- Adding keyttl and keycutofftime options to helm chart ([#1610](https://github.com/bitnami-labs/sealed-secrets/pull/1610))
+- Bump github.com/onsi/ginkgo/v2 from 2.20.2 to 2.21.0 ([#1623](https://github.com/bitnami-labs/sealed-secrets/pull/1623))
+
+## v0.27.2
+
+- feature: Show error if there's no secret to encode ([#1580](https://github.com/bitnami-labs/sealed-secrets/pull/1580))
+- feature: allow container port configuration ([#1606](https://github.com/bitnami-labs/sealed-secrets/pull/1606))
+- chore: Update go version to 1.22.8 ([#1621](https://github.com/bitnami-labs/sealed-secrets/pull/1621))
+- chore: Update the TCSP settings for helm testing ([#1608](https://github.com/bitnami-labs/sealed-secrets/pull/1608))
+- chore: Redirect external site to the GitHub Repository ([#1589](https://github.com/bitnami-labs/sealed-secrets/pull/1589))
+- chore: Update dependencies (Several automatic PRs)
+
+## v0.27.1
+
+- chore: Update dependencies ([#1565](https://github.com/bitnami-labs/sealed-secrets/pull/1565))
+- chore: Bump golang.org/x/crypto from 0.24.0 to 0.25.0 ([#1561](https://github.com/bitnami-labs/sealed-secrets/pull/1561))
+- chore: Bump k8s.io/klog/v2 from 2.130.0 to 2.130.1 ([#1558](https://github.com/bitnami-labs/sealed-secrets/pull/1558))
+- chore: Improve release process ([#1559](https://github.com/bitnami-labs/sealed-secrets/pull/1559))
+
+## v0.27.0
+
+- feature: loadbalancerclass ([#1545](https://github.com/bitnami-labs/sealed-secrets/pull/1545))
+- Add sprig function library for templating ([#1542](https://github.com/bitnami-labs/sealed-secrets/pull/1542))
+- Update install instructions for consistent HTTP request package ([#1546](https://github.com/bitnami-labs/sealed-secrets/pull/1546))
+- Bump k8s.io/client-go from 0.30.1 to 0.30.2 ([#1552](https://github.com/bitnami-labs/sealed-secrets/pull/1552))
+- Bump k8s.io/klog/v2 from 2.120.1 to 2.130.0 ([#1551](https://github.com/bitnami-labs/sealed-secrets/pull/1551))
+- Bump k8s.io/code-generator from 0.30.1 to 0.30.2 ([#1550](https://github.com/bitnami-labs/sealed-secrets/pull/1550))
+- Bump golang.org/x/crypto from 0.23.0 to 0.24.0 ([#1544](https://github.com/bitnami-labs/sealed-secrets/pull/1544))
+- Bump github.com/onsi/ginkgo/v2 from 2.17.3 to 2.19.0 ([#1540](https://github.com/bitnami-labs/sealed-secrets/pull/1540))
+
+## v0.26.3
+
+### Changelog
+
+- fix: code generation ([#1536](https://github.com/bitnami-labs/sealed-secrets/pull/1536))
+- fix: show field name in error message when base64 decoding fails ([#1519](https://github.com/bitnami-labs/sealed-secrets/pull/1519))
+- helm: Set `GOMAXPROCS` and `GOMEMLIMIT` environment variables ([#1528](https://github.com/bitnami-labs/sealed-secrets/pull/1528))
+- docs: mention limitation of backup with key renewal ([#1533](https://github.com/bitnami-labs/sealed-secrets/pull/1533))
+- chore: update dependencies ([#1535](https://github.com/bitnami-labs/sealed-secrets/pull/1535))
+- chore: Bump k8s.io/code-generator from 0.30.0 to 0.30.1 ([#1529](https://github.com/bitnami-labs/sealed-secrets/pull/1529))
+- chore: Bump k8s.io/client-go from 0.30.0 to 0.30.1 ([#1532](https://github.com/bitnami-labs/sealed-secrets/pull/1532))
+- chore: Bump github.com/onsi/ginkgo/v2 from 2.17.2 to 2.17.3 ([#1527](https://github.com/bitnami-labs/sealed-secrets/pull/1527))
+- chore: Bump github.com/prometheus/client_golang from 1.19.0 to 1.19.1 ([#1526](https://github.com/bitnami-labs/sealed-secrets/pull/1526))
+- chore: Bump k8s.io/code-generator from 0.29.3 to 0.30.0 ([#1513](https://github.com/bitnami-labs/sealed-secrets/pull/1513))
+- chore: Update dependencies ([#1524](https://github.com/bitnami-labs/sealed-secrets/pull/1524))
+- chore: Bump github.com/onsi/gomega from 1.33.0 to 1.33.1 ([#1522](https://github.com/bitnami-labs/sealed-secrets/pull/1522))
+- chore: Bump github.com/onsi/ginkgo/v2 from 2.17.1 to 2.17.2 ([#1520](https://github.com/bitnami-labs/sealed-secrets/pull/1520))
+- chore: Bump github.com/onsi/gomega from 1.32.0 to 1.33.0 ([#1512](https://github.com/bitnami-labs/sealed-secrets/pull/1512))
+- chore: increase vib timeout ([#1509](https://github.com/bitnami-labs/sealed-secrets/pull/1509))
+- chore: fix publish-release workflow ([#1508](https://github.com/bitnami-labs/sealed-secrets/pull/1508))
+- chore: Bump golang.org/x/crypto from 0.21.0 to 0.22.0 ([#1505](https://github.com/bitnami-labs/sealed-secrets/pull/1505))
+
+## v0.26.2
+
+### Changelog
+
+- fix: update dependencies and version for CVE-2023-45288 ([#1501](https://github.com/bitnami-labs/sealed-secrets/pull/1501))
+- fix(helm): role binding annotations ([#1494](https://github.com/bitnami-labs/sealed-secrets/pull/1494))
+- chore: update cosign version ([#1495](https://github.com/bitnami-labs/sealed-secrets/pull/1495))
+- chore: Bump github.com/onsi/ginkgo/v2 from 2.16.0 to 2.17.1 ([#1497](https://github.com/bitnami-labs/sealed-secrets/pull/1497))
+- chore: Bump k8s.io/client-go from 0.29.2 to 0.29.3 ([#1486](https://github.com/bitnami-labs/sealed-secrets/pull/1486))
+- chore: Bump k8s.io/code-generator from 0.29.2 to 0.29.3 ([#1488](https://github.com/bitnami-labs/sealed-secrets/pull/1488))
+- chore: Bump github.com/onsi/gomega from 1.31.1 to 1.32.0 ([#1489](https://github.com/bitnami-labs/sealed-secrets/pull/1489))
+- chore: Bump k8s.io/apimachinery from 0.29.2 to 0.29.3 ([#1490](https://github.com/bitnami-labs/sealed-secrets/pull/1490))
+- chore: Update security contact and other references DL to the new team one ([#1500](https://github.com/bitnami-labs/sealed-secrets/pull/1500))
+
+## v0.26.1
+
+### Changelog
+
+- fix: panic when patching empty secret ([#1474](https://github.com/bitnami-labs/sealed-secrets/pull/1474))
+- fix: Modify LastUpdateTime when the Sealed Secrets is being updated ([#1475](https://github.com/bitnami-labs/sealed-secrets/pull/1475))
+- fix: Bring back private keys logging ([#1481](https://github.com/bitnami-labs/sealed-secrets/pull/1481))
+- fix: missing common annotations in the helm chart ([#1471](https://github.com/bitnami-labs/sealed-secrets/pull/1471))
+- fix: Add metrics port to allow ingress traffic in the netpols ([#1473](https://github.com/bitnami-labs/sealed-secrets/pull/1473))
+- chore: Bump google.golang.org/protobuf from 1.32.0 to 1.33.0 ([#1480](https://github.com/bitnami-labs/sealed-secrets/pull/1480))
+- chore: Bump golang.org/x/crypto from 0.20.0 to 0.21.0 ([#1477](https://github.com/bitnami-labs/sealed-secrets/pull/1477))
+- chore: Bump github.com/onsi/ginkgo/v2 from 2.15.0 to 2.16.0 ([#1478](https://github.com/bitnami-labs/sealed-secrets/pull/1478))
+- chore: Bump github.com/prometheus/client_golang from 1.18.0 to 1.19.0 ([#1476](https://github.com/bitnami-labs/sealed-secrets/pull/1476))
+- chore: Bump golang.org/x/crypto from 0.19.0 to 0.20.0 ([#1472](https://github.com/bitnami-labs/sealed-secrets/pull/1472))
+- chore: Bump k8s.io/code-generator from 0.29.1 to 0.29.2 ([#1467](https://github.com/bitnami-labs/sealed-secrets/pull/1467))
+
+## v0.26.0
+
+### Changelog
+
+- feat: Implement structured logging ([#1438](https://github.com/bitnami-labs/sealed-secrets/pull/1438))
+- feat: [helm] add rbac.proxier config ([#1451](https://github.com/bitnami-labs/sealed-secrets/pull/1451))
+- docs: Add clarity around template Secret fields ([#1456](https://github.com/bitnami-labs/sealed-secrets/pull/1456))
+- docs: [helm] adding disable keyrenewperiod comment ([#1455](https://github.com/bitnami-labs/sealed-secrets/pull/1455))
+- chore: Update Go version and dependencies ([#1460](https://github.com/bitnami-labs/sealed-secrets/pull/1460))
+- chore: Bump golang.org/x/crypto from 0.18.0 to 0.19.0 ([#1458](https://github.com/bitnami-labs/sealed-secrets/pull/1458))
+- chore: Bump k8s.io/client-go from 0.29.0 to 0.29.1 ([#1452](https://github.com/bitnami-labs/sealed-secrets/pull/1452))
+- chore: Bump k8s.io/code-generator from 0.29.0 to 0.29.1 ([#1441](https://github.com/bitnami-labs/sealed-secrets/pull/1441))
+- chore: Bump k8s.io/api from 0.29.0 to 0.29.1 ([#1443](https://github.com/bitnami-labs/sealed-secrets/pull/1443))
+- chore: Bump k8s.io/klog/v2 from 2.120.0 to 2.120.1 ([#1439](https://github.com/bitnami-labs/sealed-secrets/pull/1439))
+- chore: Bump github.com/onsi/gomega from 1.30.0 to 1.31.1 ([#1440](https://github.com/bitnami-labs/sealed-secrets/pull/1440))
+
+## v0.25.0
+
+### Changelog
+
+- feat: support immutable secrets ([#1395](https://github.com/bitnami-labs/sealed-secrets/pull/1395))
+- Update dependencies ([#1411](https://github.com/bitnami-labs/sealed-secrets/pull/1411))
+- Support fetching certificate URL via proxy environment variables ([#1419](https://github.com/bitnami-labs/sealed-secrets/pull/1419))
+- Bump github.com/onsi/ginkgo/v2 from 2.13.2 to 2.14.0 ([#1432](https://github.com/bitnami-labs/sealed-secrets/pull/1432)
+- Bump k8s.io/klog/v2 from 2.110.1 to 2.120.0 ([#1431](https://github.com/bitnami-labs/sealed-secrets/pull/1431))
+- Bump golang.org/x/crypto from 0.17.0 to 0.18.0 ([#1425](https://github.com/bitnami-labs/sealed-secrets/pull/1425))
+- Bump github.com/prometheus/client_golang from 1.17.0 to 1.18.0 ([#1421](https://github.com/bitnami-labs/sealed-secrets/pull/1421))
+- Bump k8s.io/code-generator from 0.28.4 to 0.29.0 ([#1406](https://github.com/bitnami-labs/sealed-secrets/pull/1406))
+- Bump golang.org/x/crypto from 0.16.0 to 0.17.0 ([#1405](https://github.com/bitnami-labs/sealed-secrets/pull/1405))
+
+## v0.24.5
+
+### Changelog
+
+- feat: Helm - Add sources ([#1383](https://github.com/bitnami-labs/sealed-secrets/pull/1383))
+- Update golang to the latest tooling version ([#1398](https://github.com/bitnami-labs/sealed-secrets/pull/1398))
+- Bump github.com/onsi/ginkgo/v2 from 2.13.1 to 2.13.2 ([#1397](https://github.com/bitnami-labs/sealed-secrets/pull/1397))
+- Bump golang.org/x/crypto from 0.15.0 to 0.16.0 ([#1394](https://github.com/bitnami-labs/sealed-secrets/pull/1394))
+- Bump k8s.io/code-generator from 0.28.3 to 0.28.4  ([#1390](https://github.com/bitnami-labs/sealed-secrets/pull/1390))
+- Bump k8s.io/client-go from 0.28.3 to 0.28.4  ([#1389](https://github.com/bitnami-labs/sealed-secrets/pull/1389))
+- Bump k8s.io/client-go from 0.28.3 to 0.28.4  ([#1389](https://github.com/bitnami-labs/sealed-secrets/pull/1389))
+
+## v0.24.4
+
+### Changelog
+
+- kubeseal: write help message to stdout ([#1377](https://github.com/bitnami-labs/sealed-secrets/pull/1377))
+- fix: Set up LastTransitionTime in case that it is empty ([#1370](https://github.com/bitnami-labs/sealed-secrets/pull/1370))
+- Bump github.com/onsi/gomega from 1.29.0 to 1.30.0 ([#1376](https://github.com/bitnami-labs/sealed-secrets/pull/1376))
+- Bump golang.org/x/crypto from 0.14.0 to 0.15.0 ([#1375](https://github.com/bitnami-labs/sealed-secrets/pull/1375))
+- Bump github.com/onsi/ginkgo/v2 from 2.13.0 to 2.13.1 ([#1374](https://github.com/bitnami-labs/sealed-secrets/pull/1374))
+- Bump k8s.io/klog/v2 from 2.100.1 to 2.110.1 ([#1367](https://github.com/bitnami-labs/sealed-secrets/pull/1367))
+
+## v0.24.3
+
+### Changelog
+
+- fix a bug that kept a sealed secret's generation and observedgeneration out of sync ([#1360](https://github.com/bitnami-labs/sealed-secrets/pull/1360))
+- fix: add pdb ([#1340](https://github.com/bitnami-labs/sealed-secrets/pull/1340))
+- Bump k8s.io/code-generator from 0.28.2 to 0.28.3 ([#1358](https://github.com/bitnami-labs/sealed-secrets/pull/1340))
+- Bump github.com/onsi/gomega from 1.28.1 to 1.29.0 ([#1357](https://github.com/bitnami-labs/sealed-secrets/pull/1357))
+- Bump github.com/mattn/go-isatty from 0.0.19 to 0.0.20 ([#1353](https://github.com/bitnami-labs/sealed-secrets/pull/1353))
+- Bump github.com/onsi/gomega from 1.28.0 to 1.28.1 ([#1351](https://github.com/bitnami-labs/sealed-secrets/pull/1351))
+- Bump k8s.io/client-go from 0.28.2 to 0.28.3 ([#1350](https://github.com/bitnami-labs/sealed-secrets/pull/1350))
+- Bump k8s.io/api from 0.28.2 to 0.28.3 ([#1349](https://github.com/bitnami-labs/sealed-secrets/pull/1349))
+- Bump github.com/google/go-cmp from 0.5.9 to 0.6.0 ([#1348](https://github.com/bitnami-labs/sealed-secrets/pull/1348))
+
+## v0.24.2
+
+### Changelog
+
+- Fix issue where sealed secrets status is not updated if sealed secret…  ([#1295](https://github.com/bitnami-labs/sealed-secrets/pull/1295))
+- Bump golang.org/x/crypto from 0.13.0 to 0.14.0([#1341](https://github.com/bitnami-labs/sealed-secrets/pull/1341))
+- Bump github.com/onsi/ginkgo/v2 from 2.12.1 to 2.13.0 ([#1342](https://github.com/bitnami-labs/sealed-secrets/pull/1342))
+- Bump golang.org/x/net from 0.14.0 to 0.17.0 ([#1344](https://github.com/bitnami-labs/sealed-secrets/pull/1344))
+
+## v0.24.1
+
+### Changelog
+
+- fix: remove trailing dashes for multidoc yaml ([#1335](https://github.com/bitnami-labs/sealed-secrets/pull/1335))
+
+## v0.24.0
+
+### Changelog
+
+- feat: multidoc support for yaml and json ([#1304](https://github.com/bitnami-labs/sealed-secrets/pull/1304))
+- Delete repeating warning message ([#1303](https://github.com/bitnami-labs/sealed-secrets/pull/1303))
+- Add dashboard configmap annotations ([#1302](https://github.com/bitnami-labs/sealed-secrets/pull/1302))
+- Update the golang version to the latest available one ([#1318](https://github.com/bitnami-labs/sealed-secrets/pull/1318))
+- Update Linux installation process on README to have a way to dynamically get kubeseal version number ([#1294](https://github.com/bitnami-labs/sealed-secrets/pull/1294))
+- Bump golang.org/x/crypto from 0.12.0 to 0.13.0 ([#1319](https://github.com/bitnami-labs/sealed-secrets/pull/1319))
+- Bump github.com/onsi/ginkgo/v2 from 2.11.0 to 2.12.0 ([#1310](https://github.com/bitnami-labs/sealed-secrets/pull/1310))
+- Bump k8s.io/client-go from 0.28.0 to 0.28.1 ([#1308](https://github.com/bitnami-labs/sealed-secrets/pull/1308))
+- Bump k8s.io/code-generator from 0.28.0 to 0.28.1 ([#1307](https://github.com/bitnami-labs/sealed-secrets/pull/1307))
+- Bump k8s.io/code-generator from 0.27.4 to 0.28.0 ([#1300](https://github.com/bitnami-labs/sealed-secrets/pull/1300))
+- Bump k8s.io/client-go from 0.27.4 to 0.28.0 ([#1297](https://github.com/bitnami-labs/sealed-secrets/pull/1297))
+
+## v0.23.1
+
+### Changelog
+
+- securityContext adjusted ([#1261](https://github.com/bitnami-labs/sealed-secrets/pull/1261))
+- allow changing the default revisionHistoryLimit ([#1286](https://github.com/bitnami-labs/sealed-secrets/pull/1286))
+- Bump k8s.io/client-go from 0.27.3 to 0.27.4 ([#1277](https://github.com/bitnami-labs/sealed-secrets/pull/1277))
+- Bump k8s.io/code-generator from 0.27.3 to 0.27.4 ([#1278](https://github.com/bitnami-labs/sealed-secrets/pull/1278))
+- Bump github.com/onsi/gomega from 1.27.8 to 1.27.10 ([#1279](https://github.com/bitnami-labs/sealed-secrets/pull/1279))
+- Bump k8s.io/api from 0.27.3 to 0.27.4 ([#1281](https://github.com/bitnami-labs/sealed-secrets/pull/1281))
+- Bump golang.org/x/crypto from 0.11.0 to 0.12.0 ([#1287](https://github.com/bitnami-labs/sealed-secrets/pull/1287)
+
+## v0.23.0
+
+### Changelog
+
+- Add option for custom annotations and labels on sealing keypairs ([#1250](https://github.com/bitnami-labs/sealed-secrets/pull/1250))
+- Add option to patch secrets instead of clobbering them ([#1259](https://github.com/bitnami-labs/sealed-secrets/pull/1259))
+- Improve CLI UX error message while service is not found ([#1256](https://github.com/bitnami-labs/sealed-secrets/pull/1256))
+- Add namespaced roles support to Helm chart ([#1240](https://github.com/bitnami-labs/sealed-secrets/pull/1240))
+- add --log-info-stdout to chart ([#1238](https://github.com/bitnami-labs/sealed-secrets/pull/1238))
+- Fix networkpolicy port + add egress ([#1243](https://github.com/bitnami-labs/sealed-secrets/pull/1243))
+- Create index for Sealed Secrets public documentation ([#1264](https://github.com/bitnami-labs/sealed-secrets/pull/1264))
+- Getting started page ([#1253](https://github.com/bitnami-labs/sealed-secrets/pull/1253))
+- Create a FAQ document for Sealed Secrets public documentation ([#1269](https://github.com/bitnami-labs/sealed-secrets/pull/1269))
+- Create a cryptography document for Sealed Secrets public documentation ([#1267](https://github.com/bitnami-labs/sealed-secrets/pull/1267))
+- Validate existing Sealed Secrets document ([#1266](https://github.com/bitnami-labs/sealed-secrets/pull/1266))
+- added support policy to readme ([#1265](https://github.com/bitnami-labs/sealed-secrets/pull/1265))
+- Add missing document seperator ([#1260](https://github.com/bitnami-labs/sealed-secrets/pull/1260))
+- Enable full linter support for golangci-lint ([#1262](https://github.com/bitnami-labs/sealed-secrets/pull/1262))
+- Update minikube K8S versions ([#1251](https://github.com/bitnami-labs/sealed-secrets/pull/1251))
+- Bump github.com/onsi/ginkgo/v2 from 2.10.0 to 2.11.0 ([#1254](https://github.com/bitnami-labs/sealed-secrets/pull/1254))
+- Bump k8s.io/code-generator from 0.27.2 to 0.27.3 ([#1255](https://github.com/bitnami-labs/sealed-secrets/pull/1255))
+- Bump golang.org/x/crypto from 0.10.0 to 0.11.0 ([#1268](https://github.com/bitnami-labs/sealed-secrets/pull/1268))
+- Bump github.com/prometheus/client_golang from 1.15.1 to 1.16.0 ([#1247](https://github.com/bitnami-labs/sealed-secrets/pull/1247))
+- Bump golang.org/x/crypto from 0.9.0 to 0.10.0 ([#1248](https://github.com/bitnami-labs/sealed-secrets/pull/1248))
+- Bump k8s.io/client-go from 0.27.2 to 0.27.3 ([#1244](https://github.com/bitnami-labs/sealed-secrets/pull/1244))
+
+## v0.22.0
+
+### Changelog
+
+- Feature allow to skip set owner references ([#1200](https://github.com/bitnami-labs/sealed-secrets/pull/1200))
+- Add additionalPrinterColumns for status and age ([#1217](https://github.com/bitnami-labs/sealed-secrets/pull/1217))
+- Add replicas default value to the deployment manifest ([#1219](https://github.com/bitnami-labs/sealed-secrets/pull/1219))
+- Create SECURITY.md ([#1226](https://github.com/bitnami-labs/sealed-secrets/pull/1226))
+- Fix doc generated code directory ([#1227](https://github.com/bitnami-labs/sealed-secrets/pull/1227))
+- Update generated code ([#1228](https://github.com/bitnami-labs/sealed-secrets/pull/1228))
+- Update maintainers list ([#1237](https://github.com/bitnami-labs/sealed-secrets/pull/1237))
+- Bump github.com/onsi/ginkgo/v2 from 2.9.4 to 2.9.5 ([#1215](https://github.com/bitnami-labs/sealed-secrets/pull/1215))
+- Bump golang.org/x/crypto from 0.8.0 to 0.9.0 ([#1216](https://github.com/bitnami-labs/sealed-secrets/pull/1216))
+- Bump k8s.io/apimachinery from 0.27.1 to 0.27.2 ([#1221](https://github.com/bitnami-labs/sealed-secrets/pull/1221))
+- Bump k8s.io/client-go from 0.27.1 to 0.27.2 ([#1222](https://github.com/bitnami-labs/sealed-secrets/pull/1222))
+- Bump github.com/mattn/go-isatty from 0.0.18 to 0.0.19 ([#1223](https://github.com/bitnami-labs/sealed-secrets/pull/1223))
+- Bump k8s.io/code-generator from 0.27.1 to 0.27.2 ([#1225](https://github.com/bitnami-labs/sealed-secrets/pull/1225))
+- Bump github.com/onsi/gomega from 1.27.6 to 1.27.7 ([#1229](https://github.com/bitnami-labs/sealed-secrets/pull/1229))
+- Bump github.com/onsi/ginkgo/v2 from 2.9.5 to 2.9.7 ([#1231](https://github.com/bitnami-labs/sealed-secrets/pull/1231))
+- Bump github.com/onsi/gomega from 1.27.7 to 1.27.8 ([#1234](https://github.com/bitnami-labs/sealed-secrets/pull/1234))
+- Bump github.com/onsi/ginkgo/v2 from 2.9.7 to 2.10.0 ([#1235](https://github.com/bitnami-labs/sealed-secrets/pull/1235))
+
+## v0.21.0
+
+### Changelog
+
+- Enable logging info to stdout([#1195](https://github.com/bitnami-labs/sealed-secrets/pull/1195))
+- Bump github.com/prometheus/client_golang from 1.15.0 to 1.15.1 ([#1204](https://github.com/bitnami-labs/sealed-secrets/pull/1204))
+- Bump github.com/onsi/ginkgo/v2 from 2.9.2 to 2.9.4 ([#1203](https://github.com/bitnami-labs/sealed-secrets/pull/1203))
+- Bump k8s.io/klog/v2 from 2.90.1 to 2.100.1 ([#1201](https://github.com/bitnami-labs/sealed-secrets/pull/1201))
+- Bump k8s.io/code-generator from 0.26.3 to 0.27.1 ([#1188](https://github.com/bitnami-labs/sealed-secrets/pull/1188)) 
+- Bump k8s.io/client-go from 0.26.3 to 0.27.1 ([#1187](https://github.com/bitnami-labs/sealed-secrets/pull/1187)) 
+- Bump github.com/prometheus/client_golang from 1.14.0 to 1.15.0 ([#1189](https://github.com/bitnami-labs/sealed-secrets/pull/1189)) 
+
+## v0.20.5
+
+### Changelog
+
+- Generate embedded ObjectMeta in CRD ([#1177](https://github.com/bitnami-labs/sealed-secrets/pull/1177))
+- Sign images using Cosign v2 ([#1176](https://github.com/bitnami-labs/sealed-secrets/pull/1176))
+- ReProcess only on spec changes ([#1174](https://github.com/bitnami-labs/sealed-secrets/pull/1174))
+- Upgrade sealed secrets to Go 1.20 ([#1173](https://github.com/bitnami-labs/sealed-secrets/pull/1173))
+- Fix cosign command for goreleaser ([#1180](https://github.com/bitnami-labs/sealed-secrets/pull/1180))
+- Fix kubeseal image sign for cosign v2 ([#1182](https://github.com/bitnami-labs/sealed-secrets/pull/1182))
+- Remove automountServiceAccountToken parameter ([#1162](https://github.com/bitnami-labs/sealed-secrets/pull/1162))
+- Verify chart with secret recreation disabled ([#1163](https://github.com/bitnami-labs/sealed-secrets/pull/1163))
+- Bump golang.org/x/crypto from 0.7.0 to 0.8.0 ([#1175](https://github.com/bitnami-labs/sealed-secrets/pull/1175))
+- Bump github.com/onsi/gomega from 1.27.5 to 1.27.6 ([#1169](https://github.com/bitnami-labs/sealed-secrets/pull/1169))
+- Bump github.com/onsi/gomega from 1.27.4 to 1.27.5 ([#1168](https://github.com/bitnami-labs/sealed-secrets/pull/1168))
+- Bump github.com/mattn/go-isatty from 0.0.17 to 0.0.18 ([#1167](https://github.com/bitnami-labs/sealed-secrets/pull/1167))
+- Bump github.com/onsi/ginkgo/v2 from 2.9.1 to 2.9.2 ([#1166](https://github.com/bitnami-labs/sealed-secrets/pull/1166))
+- Bump k8s.io/apimachinery from 0.26.2 to 0.26.3 ([#1160](https://github.com/bitnami-labs/sealed-secrets/pull/1160))
+- Bump k8s.io/code-generator from 0.26.2 to 0.26.3 ([#1159](https://github.com/bitnami-labs/sealed-secrets/pull/1159))
+- Bump k8s.io/api from 0.26.2 to 0.26.3 ([#1158](https://github.com/bitnami-labs/sealed-secrets/pull/1158))
+- Bump k8s.io/client-go from 0.26.2 to 0.26.3 ([#1157](https://github.com/bitnami-labs/sealed-secrets/pull/1157))
+- Update VIB release tag format ([#1165](https://github.com/bitnami-labs/sealed-secrets/pull/1165))
+- Update VIB action ([#1164](https://github.com/bitnami-labs/sealed-secrets/pull/1164))
+- Include dockerhub pull statistics in the project README ([#1172](https://github.com/bitnami-labs/sealed-secrets/pull/1172))
+
+## v0.20.4
+
+Incomplete release
+
+## v0.20.3
+
+Incomplete release
+
 ## v0.20.2
 
 ### Changelog
@@ -40,7 +349,7 @@ Incomplete release
 ### Changelog
 
 - Automated controller test on Openshift platforms (using ([VMware Image Builder](https://tanzu.vmware.com/image-builder)) ([#1107](https://github.com/bitnami-labs/sealed-secrets/pull/1107)).
-- We now generate a Carvel package distrinbution of the controller ([#1104](https://github.com/bitnami-labs/sealed-secrets/pull/1104)).
+- We now generate a Carvel package distribution of the controller ([#1104](https://github.com/bitnami-labs/sealed-secrets/pull/1104)).
 - Bump golang.org/x/crypto from 0.5.0 to 0.6.0 ([#1108](https://github.com/bitnami-labs/sealed-secrets/pull/1108)).
 - Bump github.com/onsi/gomega from 1.25.0 to 1.26.0 ([#1103](https://github.com/bitnami-labs/sealed-secrets/pull/1103)).
 - Bump k8s.io/code-generator from 0.26.0 to 0.26.1 ([#1102](https://github.com/bitnami-labs/sealed-secrets/pull/1102)).
@@ -162,7 +471,7 @@ Incomplete release
 
 - Unseal templates even when encryptedData is empty ([#653](https://github.com/bitnami-labs/sealed-secrets/pull/653))
 - Add new RBAC rules to make Sealed Secret compatible with K8s environments with RBAC enabled ([#715](https://github.com/bitnami-labs/sealed-secrets/pull/715))
-- Allow rencrypt/validate functionalities to work with named ports defined in the Sealed Secret service ([#726](https://github.com/bitnami-labs/sealed-secrets/pull/726))
+- Allow re-encrypt/validate functionalities to work with named ports defined in the Sealed Secret service ([#726](https://github.com/bitnami-labs/sealed-secrets/pull/726))
 - Fix verbose logging ([#727](https://github.com/bitnami-labs/sealed-secrets/pull/727))
 
 ## v0.17.2
@@ -578,7 +887,7 @@ This potential problem has been introduced v0.8.0 when kubeseal learned how to p
 
 Please check your existing sealed secret sources for any annotation `kubectl.kubernetes.io/last-applied-configuration`, because that annotation would contain your original secrets in clear.
 
-This release strips this annotation (and a similar annotation created by the `kubcfg` tool)
+This release strips this annotation (and a similar annotation created by the `kubecfg` tool)
 
 ### Changelog
 
@@ -654,7 +963,7 @@ Big change for this release is the switch to **per-key encrypted values**.
 
 - Add CRD definition and TPR->CRD migration documentation
 - Add `kubeseal --fetch-cert` to dump server cert to stdout, for later offline use with `kubeseal --cert`
-- Better sanitisation of input object to `kubeseal`
+- Better sanitization of input object to `kubeseal`
 
 (v0.5.1 fixes a travis/github release issue with v0.5.0)
 
